@@ -1,0 +1,806 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>拼豆像素画工坊 - 图片转拼豆图纸</title>
+<meta name="description" content="在线拼豆图片转换工具，上传图片一键生成拼豆像素图纸，支持Perler/Artkal色板匹配，高清PNG导出">
+<style>
+:root {
+  --bg: #f5f0eb;
+  --card-bg: #ffffff;
+  --text: #2d2a24;
+  --text-secondary: #7a6e5e;
+  --border: #d4cdc4;
+  --accent: #c4a882;
+  --accent-hover: #b8956a;
+  --btn-primary: #2d2a24;
+  --shadow: rgba(0,0,0,0.06);
+  --radius: 16px;
+}
+body.dark {
+  --bg: #1a1816;
+  --card-bg: #2a2724;
+  --text: #e8e0d8;
+  --text-secondary: #a09888;
+  --border: #4a4440;
+  --shadow: rgba(0,0,0,0.3);
+  --btn-primary: #c4a882;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  transition: background .3s, color .3s;
+}
+.header {
+  text-align: center;
+  max-width: 960px;
+  width: 100%;
+  margin-bottom: 8px;
+}
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+.header h1 { font-size:26px; margin:12px 0 4px; letter-spacing:1px; }
+.header .subtitle { color:var(--text-secondary); font-size:14px; margin-bottom:16px; }
+.theme-toggle {
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:6px 14px;
+  cursor:pointer;
+  font-size:16px;
+  color:var(--text);
+  transition:.2s;
+}
+.theme-toggle:hover { background:var(--accent); color:#fff; }
+.container { max-width:960px; width:100%; }
+
+.card {
+  background:var(--card-bg);
+  border-radius:20px;
+  padding:28px;
+  box-shadow:0 4px 24px var(--shadow);
+  width:100%;
+  transition:background .3s;
+}
+
+.upload-area {
+  border:2px dashed var(--border);
+  border-radius:var(--radius);
+  padding:48px 20px;
+  text-align:center;
+  cursor:pointer;
+  transition:all .2s;
+  background:color-mix(in srgb, var(--card-bg) 98%, var(--accent));
+}
+.upload-area:hover { border-color:var(--accent); background:color-mix(in srgb, var(--card-bg) 95%, var(--accent)); }
+.upload-area.dragover { border-color:var(--accent-hover); background:color-mix(in srgb, var(--card-bg) 90%, var(--accent)); }
+.upload-area .icon { font-size:56px; display:block; margin-bottom:8px; }
+.upload-area .hint { font-size:15px; color:var(--text-secondary); }
+.upload-area .sub-hint { font-size:12px; color:var(--text-secondary); opacity:.6; margin-top:4px; }
+input[type="file"] { display:none; }
+
+.workspace { display:none; margin-top:24px; }
+.workspace.visible { display:block; }
+
+.preview-row {
+  display:flex;
+  gap:20px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+.preview-box {
+  flex:1;
+  min-width:200px;
+  max-width:420px;
+  text-align:center;
+}
+.preview-box .label {
+  font-size:13px;
+  color:var(--text-secondary);
+  display:block;
+  margin-bottom:8px;
+  font-weight:500;
+}
+.preview-box canvas,
+.preview-box img {
+  max-width:100%;
+  border-radius:12px;
+  box-shadow:0 2px 12px var(--shadow);
+  background:#fff;
+}
+.preview-box img { display:block; }
+
+.controls-section {
+  margin-top:24px;
+  padding-top:20px;
+  border-top:1px solid var(--border);
+}
+.controls-grid {
+  display:flex;
+  flex-wrap:wrap;
+  gap:16px 24px;
+  align-items:end;
+}
+.control-group {
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.control-group label {
+  font-size:12px;
+  color:var(--text-secondary);
+  font-weight:500;
+}
+.control-group select,
+.control-group input[type="range"] {
+  padding:6px 10px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:var(--card-bg);
+  color:var(--text);
+  font-size:13px;
+  transition:.2s;
+}
+.control-group select:focus,
+.control-group input[type="range"]:focus {
+  outline:none;
+  border-color:var(--accent);
+}
+.control-group input[type="range"] {
+  min-width:120px;
+  accent-color:var(--accent);
+}
+.control-group .range-val {
+  font-size:11px;
+  color:var(--text-secondary);
+  text-align:center;
+}
+
+.btn {
+  padding:10px 24px;
+  border:none;
+  border-radius:10px;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all .2s;
+  white-space:nowrap;
+}
+.btn-primary { background:var(--btn-primary); color:var(--card-bg); }
+.btn-primary:hover { opacity:.85; transform:translateY(-1px); }
+.btn-primary:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+.btn-accent { background:var(--accent); color:#fff; }
+.btn-accent:hover { background:var(--accent-hover); transform:translateY(-1px); }
+.btn-outline {
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text);
+}
+.btn-outline:hover { border-color:var(--accent); background:color-mix(in srgb, var(--accent) 10%, transparent); }
+.btn-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+
+#sizeInfo {
+  font-size:12px;
+  color:var(--text-secondary);
+  text-align:center;
+  margin-top:12px;
+}
+
+/* Color Legend */
+.legend-section {
+  margin-top:20px;
+  padding-top:16px;
+  border-top:1px solid var(--border);
+}
+.legend-section h3 {
+  font-size:14px;
+  color:var(--text-secondary);
+  margin-bottom:12px;
+  font-weight:600;
+}
+.legend-grid {
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.legend-item {
+  display:flex;
+  align-items:center;
+  gap:4px;
+  padding:4px 10px 4px 4px;
+  border-radius:8px;
+  background:color-mix(in srgb, var(--card-bg) 96%, var(--text));
+  font-size:11px;
+  color:var(--text-secondary);
+}
+.legend-swatch {
+  width:16px;
+  height:16px;
+  border-radius:4px;
+  border:1px solid rgba(0,0,0,.08);
+  flex-shrink:0;
+}
+
+/* Bead size real-world info */
+.bead-info {
+  display:flex;
+  gap:16px;
+  flex-wrap:wrap;
+  margin-top:12px;
+  padding:12px 16px;
+  background:color-mix(in srgb, var(--card-bg) 97%, var(--accent));
+  border-radius:10px;
+  font-size:12px;
+  color:var(--text-secondary);
+}
+.bead-info span { display:flex; align-items:center; gap:4px; }
+
+.footer {
+  margin-top:32px;
+  font-size:12px;
+  color:var(--text-secondary);
+  text-align:center;
+  line-height:1.8;
+  opacity:.7;
+}
+
+@media (max-width:640px) {
+  body { padding:12px; }
+  .card { padding:16px; }
+  .upload-area { padding:32px 16px; }
+  .preview-row { flex-direction:column; align-items:center; }
+  .preview-box { min-width:160px; max-width:320px; }
+  .controls-grid { flex-direction:column; align-items:stretch; }
+  .control-group input[type="range"] { width:100%; }
+  .btn-row { flex-direction:column; }
+  .btn-row .btn { width:100%; text-align:center; }
+  .bead-info { flex-direction:column; gap:4px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="header-top">
+      <div></div>
+      <button class="theme-toggle" id="themeToggle" title="切换深色/浅色模式">🌓</button>
+    </div>
+    <h1>🧩 拼豆像素工坊</h1>
+    <p class="subtitle">上传任意图片 → 一键生成标准拼豆图纸 · 支持 Perler / Artkal 色板</p>
+  </div>
+
+  <div class="card">
+    <div class="upload-area" id="uploadArea">
+      <span class="icon">🖼️</span>
+      <div class="hint">点击上传图片，或拖拽图片到此处</div>
+      <div class="sub-hint">支持 JPG / PNG / WebP · 也支持 Ctrl+V 粘贴</div>
+      <input type="file" id="fileInput" accept="image/*">
+    </div>
+
+    <div class="workspace" id="workspace">
+      <div class="preview-row">
+        <div class="preview-box">
+          <span class="label">📷 原图</span>
+          <img id="originalPreview" alt="原图预览">
+        </div>
+        <div class="preview-box">
+          <span class="label">🧩 拼豆图纸</span>
+          <canvas id="pixelCanvas"></canvas>
+        </div>
+      </div>
+
+      <div class="controls-section">
+        <div class="controls-grid">
+          <div class="control-group">
+            <label>像素格数</label>
+            <select id="pixelSize">
+              <option value="8">8 × 8</option>
+              <option value="10">10 × 10</option>
+              <option value="12">12 × 12</option>
+              <option value="14">14 × 14</option>
+              <option value="16" selected>16 × 16</option>
+              <option value="18">18 × 18</option>
+              <option value="20">20 × 20</option>
+              <option value="24">24 × 24</option>
+              <option value="28">28 × 28</option>
+              <option value="32">32 × 32</option>
+              <option value="40">40 × 40</option>
+              <option value="48">48 × 48</option>
+              <option value="56">56 × 56</option>
+              <option value="64">64 × 64</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label>色板</label>
+            <select id="paletteSelect">
+              <option value="perler" selected>🟡 Perler 原厂色 (70色)</option>
+              <option value="artkal">🔵 Artkal 通用色 (70色)</option>
+              <option value="dmc">🔴 DMC 绣线色 (70色)</option>
+              <option value="full">🌈 全彩自动</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label>颜色数量 <span class="range-val" id="colorCountVal">24</span></label>
+            <input type="range" id="colorCount" min="8" max="70" value="24">
+          </div>
+          <div class="control-group">
+            <label>网格线</label>
+            <select id="gridStyle">
+              <option value="light">浅色</option>
+              <option value="dark">深色</option>
+              <option value="none">无网格</option>
+            </select>
+          </div>
+          <div class="btn-row" style="margin:0">
+            <button class="btn btn-accent" id="generateBtn">✨ 重新生成</button>
+            <button class="btn btn-primary" id="downloadBtn">⬇️ 下载高清图纸</button>
+            <button class="btn btn-outline" id="resetBtn">🔄 重新上传</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="sizeInfo"></div>
+
+      <div class="bead-info" id="beadInfo"></div>
+
+      <div class="legend-section" id="legendSection" style="display:none">
+        <h3>🎨 用色清单</h3>
+        <div class="legend-grid" id="legendGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    🧩 纯浏览器端处理，图片不上传服务器 · 适合 2mm/5mm 通用拼豆<br>
+    操作小贴士：建议使用轮廓清晰、色彩对比度高的图片效果更佳
+  </div>
+</div>
+<script>
+// ============================================================
+// 拼豆像素工坊 - 完整 JavaScript
+// ============================================================
+
+// --- Perler 原厂色板 (RGB) ---
+const PERLER_COLORS = [
+  [0,0,0], [255,255,255], [237,28,36], [255,127,39], [255,242,0],
+  [34,177,76], [0,162,232], [63,72,204], [163,73,164], [185,122,87],
+  [195,195,195], [128,128,128], [255,201,14], [255,174,201], [239,228,176],
+  [136,176,75], [0,113,60], [0,90,160], [70,50,150], [130,50,80],
+  [117,75,45], [235,145,55], [250,210,165], [220,180,140], [195,155,120],
+  [169,131,101], [145,108,82], [120,86,64], [200,175,150], [175,150,125],
+  [150,125,100], [230,210,190], [220,190,160], [205,170,140], [190,155,125],
+  [170,135,105], [150,115,85], [235,205,175], [215,185,155], [200,165,135],
+  [240,218,190], [225,195,165], [210,178,148], [200,165,135], [185,150,120],
+  [255,180,160], [240,155,135], [225,135,115], [210,115,95], [195,95,75],
+  [255,200,180], [245,180,160], [235,160,140], [255,215,190], [250,198,170],
+  [245,185,155], [255,225,200], [250,210,185], [255,235,210], [250,220,195],
+  [245,208,182], [255,190,128], [240,175,115], [230,160,100], [220,145,85],
+  [210,130,70], [200,115,55], [190,100,40], [180,178,150], [165,163,135]
+];
+
+// --- Artkal 通用色板 (模拟标准70色) ---
+const ARTKAL_COLORS = [
+  [0,0,0], [255,255,255], [220,30,30], [240,130,20], [245,230,30],
+  [40,180,60], [20,150,210], [50,60,190], [150,60,170], [170,110,70],
+  [180,180,180], [120,120,120], [250,200,20], [255,170,200], [230,220,170],
+  [130,170,70], [10,110,50], [10,90,160], [60,40,140], [120,40,70],
+  [100,70,40], [230,140,50], [245,210,160], [215,180,140], [190,160,125],
+  [165,135,105], [140,110,85], [115,85,65], [195,170,145], [170,145,120],
+  [145,120,95], [225,205,185], [215,185,155], [200,165,135], [185,150,120],
+  [165,130,100], [145,110,80], [230,200,170], [210,180,150], [195,160,130],
+  [235,213,185], [220,190,160], [205,173,143], [195,160,130], [180,145,115],
+  [255,175,155], [235,150,130], [220,130,110], [205,110,90], [190,90,70],
+  [255,195,175], [240,175,155], [230,155,135], [255,210,185], [245,193,165],
+  [240,180,150], [255,220,195], [245,205,180], [255,230,205], [245,215,190],
+  [240,203,177], [255,185,123], [235,170,110], [225,155,95], [215,140,80],
+  [205,125,65], [195,110,50], [185,95,35], [175,173,145], [160,158,130]
+];
+
+// --- DMC 绣线色板 (70色模拟) ---
+const DMC_COLORS = [
+  [0,0,0], [255,255,255], [230,25,35], [255,140,30], [255,230,40],
+  [50,185,65], [30,155,215], [65,70,200], [165,70,170], [180,120,80],
+  [190,190,190], [130,130,130], [250,200,30], [255,180,210], [235,225,180],
+  [140,180,80], [20,115,55], [15,95,165], [70,45,145], [135,50,80],
+  [105,75,45], [235,145,60], [250,215,170], [220,185,145], [195,160,130],
+  [170,138,110], [148,115,88], [122,92,68], [200,178,155], [175,153,130],
+  [150,128,105], [230,212,195], [218,190,162], [202,170,142], [188,155,127],
+  [170,138,108], [152,118,88], [232,205,178], [215,185,155], [200,168,138],
+  [238,215,190], [222,195,168], [208,178,150], [198,165,135], [182,150,122],
+  [255,185,165], [242,158,138], [228,138,118], [212,118,98], [198,98,78],
+  [255,200,182], [248,183,163], [238,163,143], [255,218,195], [248,200,175],
+  [242,188,160], [255,228,205], [248,213,190], [255,238,215], [248,222,198],
+  [242,210,185], [255,195,135], [242,178,120], [232,162,105], [222,148,90],
+  [212,133,75], [198,118,58], [190,102,45], [183,180,155], [168,165,140]
+];
+
+const PALETTES = { perler: PERLER_COLORS, artkal: ARTKAL_COLORS, dmc: DMC_COLORS };
+
+// ============================================================
+// DOM refs
+// ============================================================
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('fileInput');
+const workspace = document.getElementById('workspace');
+const originalPreview = document.getElementById('originalPreview');
+const pixelCanvas = document.getElementById('pixelCanvas');
+const pixelSizeSelect = document.getElementById('pixelSize');
+const paletteSelect = document.getElementById('paletteSelect');
+const colorCountInput = document.getElementById('colorCount');
+const colorCountVal = document.getElementById('colorCountVal');
+const gridStyleSelect = document.getElementById('gridStyle');
+const generateBtn = document.getElementById('generateBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const resetBtn = document.getElementById('resetBtn');
+const sizeInfo = document.getElementById('sizeInfo');
+const beadInfo = document.getElementById('beadInfo');
+const legendSection = document.getElementById('legendSection');
+const legendGrid = document.getElementById('legendGrid');
+const themeToggle = document.getElementById('themeToggle');
+
+let sourceImage = null;
+
+// ============================================================
+// Theme
+// ============================================================
+function loadTheme() {
+  const dark = localStorage.getItem('pixelbead-theme') === 'dark';
+  document.body.classList.toggle('dark', dark);
+  themeToggle.textContent = dark ? '☀️' : '🌓';
+}
+loadTheme();
+themeToggle.addEventListener('click', () => {
+  const dark = document.body.classList.toggle('dark');
+  localStorage.setItem('pixelbead-theme', dark ? 'dark' : 'light');
+  themeToggle.textContent = dark ? '☀️' : '🌓';
+});
+
+// ============================================================
+// Image loading
+// ============================================================
+uploadArea.addEventListener('click', () => fileInput.click());
+
+uploadArea.addEventListener('dragover', e => {
+  e.preventDefault();
+  uploadArea.classList.add('dragover');
+});
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+uploadArea.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadArea.classList.remove('dragover');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+
+document.addEventListener('paste', e => {
+  const item = [...e.clipboardData.items].find(i => i.type.startsWith('image/'));
+  if (item) handleFile(item.getAsFile());
+});
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length) handleFile(fileInput.files[0]);
+});
+
+function handleFile(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      sourceImage = img;
+      originalPreview.src = e.target.result;
+      workspace.classList.add('visible');
+      generate();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+resetBtn.addEventListener('click', () => {
+  sourceImage = null;
+  workspace.classList.remove('visible');
+  originalPreview.src = '';
+  fileInput.value = '';
+  legendSection.style.display = 'none';
+});
+
+// ============================================================
+// Color quantization (Median Cut)
+// ============================================================
+function quantizeColors(pixels, numColors) {
+  if (numColors >= pixels.length) return pixels;
+  const boxes = [{ start: 0, end: pixels.length - 1 }];
+
+  function splitBox(box) {
+    const slice = pixels.slice(box.start, box.end + 1);
+    const rRange = Math.max(...slice.map(p=>p[0])) - Math.min(...slice.map(p=>p[0]));
+    const gRange = Math.max(...slice.map(p=>p[1])) - Math.min(...slice.map(p=>p[1]));
+    const bRange = Math.max(...slice.map(p=>p[2])) - Math.min(...slice.map(p=>p[2]));
+
+    let channel; let maxRange;
+    if (rRange >= gRange && rRange >= bRange) { channel = 0; maxRange = rRange; }
+    else if (gRange >= bRange) { channel = 1; maxRange = gRange; }
+    else { channel = 2; maxRange = bRange; }
+
+    if (maxRange < 5) return null;
+
+    const sorted = [...pixels.entries()]
+      .filter(([i]) => i >= box.start && i <= box.end)
+      .sort((a, b) => a[1][channel] - b[1][channel])
+      .map(([i]) => i);
+
+    const mid = Math.floor(sorted.length / 2);
+    const splitIdx = sorted[mid];
+    if (splitIdx === box.start || splitIdx === box.end) return null;
+
+    return [
+      { start: box.start, end: splitIdx },
+      { start: splitIdx + 1, end: box.end }
+    ];
+  }
+
+  while (boxes.length < numColors) {
+    const largest = boxes.reduce((a, b) => (a.end - a.start) > (b.end - b.start) ? a : b);
+    const split = splitBox(largest);
+    if (!split) break;
+    const idx = boxes.indexOf(largest);
+    boxes.splice(idx, 1, ...split.filter(b => b.end - b.start >= 0));
+  }
+
+  const palette = boxes.map(box => {
+    const slice = pixels.slice(box.start, box.end + 1);
+    const r = Math.round(slice.reduce((s,p) => s + p[0], 0) / slice.length);
+    const g = Math.round(slice.reduce((s,p) => s + p[1], 0) / slice.length);
+    const b = Math.round(slice.reduce((s,p) => s + p[2], 0) / slice.length);
+    return [r, g, b];
+  });
+
+  return palette;
+}
+
+function findClosestColor(rgb, palette) {
+  let minD = Infinity; let best = palette[0];
+  for (const c of palette) {
+    const d = (rgb[0]-c[0])**2 + (rgb[1]-c[1])**2 + (rgb[2]-c[2])**2;
+    if (d < minD) { minD = d; best = c; if (d === 0) break; }
+  }
+  return best;
+}
+
+// ============================================================
+// Main generation
+// ============================================================
+function generate() {
+  if (!sourceImage) return;
+
+  const gridSize = parseInt(pixelSizeSelect.value);
+  const paletteMode = paletteSelect.value;
+  const targetColors = parseInt(colorCountInput.value);
+  const gridStyle = gridStyleSelect.value;
+  const canvas = pixelCanvas;
+  const ctx = canvas.getContext('2d');
+  const cellSize = Math.floor(400 / gridSize);
+  const px = cellSize * gridSize;
+
+  canvas.width = px;
+  canvas.height = px;
+
+  // Step 1: sample image to grid
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = gridSize;
+  tempCanvas.height = gridSize;
+  const tempCtx = tempCanvas.getContext('2d');
+  tempCtx.imageSmoothingEnabled = true;
+
+  const srcAspect = sourceImage.width / sourceImage.height;
+  let sx, sy, sw, sh;
+  if (srcAspect > 1) {
+    sh = sourceImage.height;
+    sw = sourceImage.height;
+    sx = (sourceImage.width - sw) / 2;
+    sy = 0;
+  } else {
+    sw = sourceImage.width;
+    sh = sourceImage.width;
+    sx = 0;
+    sy = (sourceImage.height - sh) / 2;
+  }
+  tempCtx.drawImage(sourceImage, sx, sy, sw, sh, 0, 0, gridSize, gridSize);
+  const imageData = tempCtx.getImageData(0, 0, gridSize, gridSize);
+  const data = imageData.data;
+
+  // Step 2: extract unique pixel colors
+  const pixelRGBs = [];
+  for (let i = 0; i < data.length; i += 4) {
+    pixelRGBs.push([data[i], data[i+1], data[i+2]]);
+  }
+
+  // Step 3: determine final palette
+  let finalPalette;
+  if (paletteMode === 'full') {
+    if (targetColors < pixelRGBs.length) {
+      finalPalette = quantizeColors(pixelRGBs, targetColors);
+    } else {
+      finalPalette = [...new Map(pixelRGBs.map(p => [p.join(','), p])).values()];
+    }
+  } else {
+    const rawPalette = PALETTES[paletteMode] || PERLER_COLORS;
+    // Use the palette directly, but limit to targetColors by picking well-distributed colors
+    const step = Math.max(1, Math.floor(rawPalette.length / targetColors));
+    finalPalette = [];
+    for (let i = 0; i < targetColors && i < rawPalette.length; i++) {
+      finalPalette.push(rawPalette[i * step % rawPalette.length]);
+    }
+    if (finalPalette.length === 0) finalPalette = [[0,0,0], [255,255,255]];
+  }
+
+  // Step 4: map each pixel to nearest palette color
+  const pixelData = new Uint8ClampedArray(data.length);
+  const colorCounts = new Map();
+  for (let i = 0; i < data.length; i += 4) {
+    const rgb = [data[i], data[i+1], data[i+2]];
+    const nearest = findClosestColor(rgb, finalPalette);
+    pixelData[i] = nearest[0];
+    pixelData[i+1] = nearest[1];
+    pixelData[i+2] = nearest[2];
+    pixelData[i+3] = 255;
+    const key = nearest.join(',');
+    colorCounts.set(key, (colorCounts.get(key) || 0) + 1);
+  }
+
+  // Step 5: draw pixelated result
+  const outCanvas = document.createElement('canvas');
+  outCanvas.width = gridSize;
+  outCanvas.height = gridSize;
+  const outCtx = outCanvas.getContext('2d');
+  const outImageData = new ImageData(pixelData, gridSize, gridSize);
+  outCtx.putImageData(outImageData, 0, 0);
+
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(outCanvas, 0, 0, px, px);
+
+  // Step 6: draw grid lines
+  if (gridStyle !== 'none') {
+    const isDark = gridStyle === 'dark';
+    ctx.strokeStyle = isDark ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i <= gridSize; i++) {
+      const pos = i * cellSize;
+      ctx.beginPath(); ctx.moveTo(pos, 0); ctx.lineTo(pos, px); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, pos); ctx.lineTo(px, pos); ctx.stroke();
+    }
+  }
+
+  // Step 7: info display
+  const maxBoardSize = 29; // standard pegboard
+  const boardsNeededW = Math.ceil(gridSize / maxBoardSize);
+  const boardsNeededH = Math.ceil(gridSize / maxBoardSize);
+  sizeInfo.textContent = `${gridSize}×${gridSize} 像素 · 每个色块 ${cellSize}×${cellSize}px · 约需 ${boardsNeededW}×${boardsNeededH} 块标准拼豆板(29×29)`;
+
+  // Step 8: bead info
+  let paletteName = 'Perler';
+  if (paletteMode === 'artkal') paletteName = 'Artkal';
+  else if (paletteMode === 'dmc') paletteName = 'DMC';
+  else if (paletteMode === 'full') paletteName = '自动调色';
+  const usedColors = colorCounts.size;
+  beadInfo.innerHTML = `
+    <span>📐 色板：${paletteName}</span>
+    <span>🎨 使用 ${usedColors} 种颜色</span>
+    <span>🧩 拼豆数：${gridSize * gridSize} 颗</span>
+    <span>📏 5mm豆成品约 ${(gridSize * 5 / 10).toFixed(1)}×${(gridSize * 5 / 10).toFixed(1)} cm</span>
+    <span>📏 2.6mm迷你豆约 ${(gridSize * 2.6 / 10).toFixed(1)}×${(gridSize * 2.6 / 10).toFixed(1)} cm</span>
+  `;
+
+  // Step 9: color legend
+  const sorted = [...colorCounts.entries()].sort((a, b) => b[1] - a[1]);
+  if (sorted.length > 0) {
+    legendSection.style.display = 'block';
+    legendGrid.innerHTML = sorted.map(([key, count]) => {
+      const [r,g,b] = key.split(',').map(Number);
+      const rgbStr = `rgb(${r},${g},${b})`;
+      return `<div class="legend-item"><div class="legend-swatch" style="background:${rgbStr}"></div>${rgbStr} × ${count}</div>`;
+    }).join('');
+  } else {
+    legendSection.style.display = 'none';
+  }
+}
+
+// ============================================================
+// Events
+// ============================================================
+generateBtn.addEventListener('click', generate);
+pixelSizeSelect.addEventListener('change', generate);
+paletteSelect.addEventListener('change', generate);
+colorCountInput.addEventListener('input', () => {
+  colorCountVal.textContent = colorCountInput.value;
+  generate();
+});
+gridStyleSelect.addEventListener('change', generate);
+
+// ============================================================
+// Download HD image with labels
+// ============================================================
+downloadBtn.addEventListener('click', () => {
+  if (!sourceImage || !workspace.classList.contains('visible')) return;
+  const gridSize = parseInt(pixelSizeSelect.value);
+  const cellSize = Math.floor(400 / gridSize);
+  const px = cellSize * gridSize;
+
+  // Create high-res export canvas
+  const exportCanvas = document.createElement('canvas');
+  const scale = 2; // 2x for print quality
+  const margin = 30 * scale;
+  const labelHeight = 50 * scale;
+  const exportW = px * scale + margin * 2;
+  const exportH = px * scale + margin * 2 + labelHeight;
+  exportCanvas.width = exportW;
+  exportCanvas.height = exportH;
+  const ectx = exportCanvas.getContext('2d');
+
+  // Background
+  ectx.fillStyle = '#ffffff';
+  ectx.fillRect(0, 0, exportW, exportH);
+
+  // Title
+  ectx.fillStyle = '#2d2a24';
+  ectx.font = `bold ${18 * scale}px -apple-system, sans-serif`;
+  ectx.textAlign = 'center';
+  ectx.fillText('🧩 拼豆图纸 · Pixel Bead Pattern', exportW / 2, margin + 14 * scale);
+
+  // Subtitle
+  ectx.fillStyle = '#7a6e5e';
+  ectx.font = `${11 * scale}px -apple-system, sans-serif`;
+  ectx.fillText(`${gridSize}×${gridSize}  |  5mm豆约 ${(gridSize * 5 / 10).toFixed(1)}×${(gridSize * 5 / 10).toFixed(1)} cm  |  2.6mm迷你豆约 ${(gridSize * 2.6 / 10).toFixed(1)}×${(gridSize * 2.6 / 10).toFixed(1)} cm`, exportW / 2, margin + 30 * scale);
+
+  // Draw the pixel art
+  ectx.imageSmoothingEnabled = false;
+  ectx.drawImage(pixelCanvas, 0, 0, px, px, margin, margin + labelHeight, px * scale, px * scale);
+
+  // Scale ruler at bottom
+  const rulerY = margin + labelHeight + px * scale + 4 * scale;
+  ectx.strokeStyle = '#999';
+  ectx.lineWidth = 1 * scale;
+  const rulerLen = 100 * scale;
+  const rulerX = margin;
+  ectx.beginPath();
+  ectx.moveTo(rulerX, rulerY); ectx.lineTo(rulerX + rulerLen, rulerY);
+  ectx.moveTo(rulerX, rulerY - 3 * scale); ectx.lineTo(rulerX, rulerY + 3 * scale);
+  ectx.moveTo(rulerX + rulerLen, rulerY - 3 * scale); ectx.lineTo(rulerX + rulerLen, rulerY + 3 * scale);
+  ectx.stroke();
+  ectx.fillStyle = '#999';
+  ectx.font = `${9 * scale}px -apple-system, sans-serif`;
+  ectx.textAlign = 'center';
+  ectx.fillText('10 cm (5mm豆约20格)', rulerX + rulerLen / 2, rulerY + 14 * scale);
+
+  // Export
+  const link = document.createElement('a');
+  link.download = `pixel-bead-pattern-${gridSize}x${gridSize}.png`;
+  link.href = exportCanvas.toDataURL('image/png');
+  link.click();
+});
+
+// ============================================================
+// Auto-generate on first image load
+// ============================================================
+console.log('🧩 拼豆像素工坊 v2.0 已加载');
+console.log('💡 提示: 使用 Perler 原厂色板可获得最真实拼豆效果');
+</script>
+</body>
+</html>
+
+
+
+
