@@ -1,10 +1,12 @@
-﻿[build]
+[build]
   publish = "."
-
-[build.environment]
-  NODE_VERSION = "18"
 
 [[headers]]
   for = "/*"
   [headers.values]
-    Cache-Control = "no-cache"
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
