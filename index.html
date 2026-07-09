@@ -1,272 +1,122 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>拼豆像素画工坊 - 图片转拼豆图纸</title>
-<meta name="description" content="在线拼豆图片转换工具，上传图片一键生成拼豆像素图纸，支持Perler/Artkal色板匹配，高清PNG导出">
+<title>拼豆像素工坊 Pro - 3D 拼豆图案生成器</title>
+<meta name="description" content="上传图片，一键生成真实3D拼豆颗粒效果的拼豆图纸。支持圆形拼豆、圆柱颗粒、中间孔洞、网格底板。">
 <style>
 :root {
-  --bg: #f5f0eb;
-  --card-bg: #ffffff;
-  --text: #2d2a24;
-  --text-secondary: #7a6e5e;
-  --border: #d4cdc4;
-  --accent: #c4a882;
-  --accent-hover: #b8956a;
-  --btn-primary: #2d2a24;
+  --bg: #f0ebe5; --card: #ffffff; --text: #2d2a24; --text2: #7a6e5e;
+  --border: #d4cdc4; --accent: #c4a882; --accent-h: #b8956a;
   --shadow: rgba(0,0,0,0.06);
-  --radius: 16px;
-}
-body.dark {
-  --bg: #1a1816;
-  --card-bg: #2a2724;
-  --text: #e8e0d8;
-  --text-secondary: #a09888;
-  --border: #4a4440;
-  --shadow: rgba(0,0,0,0.3);
-  --btn-primary: #c4a882;
 }
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
   font-family: -apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 16px;
-  transition: background .3s, color .3s;
+  background: var(--bg); color: var(--text); min-height: 100vh; display: flex;
+  flex-direction: column; align-items: center; padding: 16px;
 }
-.header {
-  text-align: center;
-  max-width: 960px;
-  width: 100%;
-  margin-bottom: 8px;
-}
-.header-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 0;
-}
-.header h1 { font-size:26px; margin:12px 0 4px; letter-spacing:1px; }
-.header .subtitle { color:var(--text-secondary); font-size:14px; margin-bottom:16px; }
-.theme-toggle {
-  background:var(--card-bg);
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:6px 14px;
-  cursor:pointer;
-  font-size:16px;
-  color:var(--text);
-  transition:.2s;
-}
-.theme-toggle:hover { background:var(--accent); color:#fff; }
-.container { max-width:960px; width:100%; }
+.header { text-align: center; max-width: 1100px; width: 100%; padding: 8px 0; }
+.header h1 { font-size: 28px; margin: 8px 0 4px; letter-spacing: 1px; }
+.header h1 span { color: var(--accent); }
+.subtitle { color: var(--text2); font-size: 14px; margin-bottom: 16px; }
+.container { max-width: 1100px; width: 100%; }
 
-.card {
-  background:var(--card-bg);
-  border-radius:20px;
-  padding:28px;
-  box-shadow:0 4px 24px var(--shadow);
-  width:100%;
-  transition:background .3s;
-}
+.card { background: var(--card); border-radius: 20px; padding: 24px; box-shadow: 0 4px 24px var(--shadow); width: 100%; }
 
+/* Upload area */
 .upload-area {
-  border:2px dashed var(--border);
-  border-radius:var(--radius);
-  padding:48px 20px;
-  text-align:center;
-  cursor:pointer;
-  transition:all .2s;
-  background:color-mix(in srgb, var(--card-bg) 98%, var(--accent));
+  border: 2px dashed var(--border); border-radius: 16px; padding: 56px 20px;
+  text-align: center; cursor: pointer; transition: all .2s;
+  background: linear-gradient(135deg, #faf8f6 0%, #f5f0eb 100%);
 }
-.upload-area:hover { border-color:var(--accent); background:color-mix(in srgb, var(--card-bg) 95%, var(--accent)); }
-.upload-area.dragover { border-color:var(--accent-hover); background:color-mix(in srgb, var(--card-bg) 90%, var(--accent)); }
-.upload-area .icon { font-size:56px; display:block; margin-bottom:8px; }
-.upload-area .hint { font-size:15px; color:var(--text-secondary); }
-.upload-area .sub-hint { font-size:12px; color:var(--text-secondary); opacity:.6; margin-top:4px; }
-input[type="file"] { display:none; }
+.upload-area:hover { border-color: var(--accent); background: linear-gradient(135deg, #f6f2ed, #efe8df); }
+.upload-area.dragover { border-color: var(--accent-h); background: linear-gradient(135deg, #efe8df, #e5dccf); }
+.upload-icon { font-size: 64px; display: block; margin-bottom: 8px; }
+.upload-hint { font-size: 16px; color: var(--text2); font-weight: 500; }
+.upload-sub { font-size: 13px; color: var(--text2); opacity: .6; margin-top: 4px; }
+input[type="file"] { display: none; }
 
-.workspace { display:none; margin-top:24px; }
-.workspace.visible { display:block; }
+/* Workspace */
+.workspace { display: none; margin-top: 24px; }
+.workspace.visible { display: block; }
 
-.preview-row {
-  display:flex;
-  gap:20px;
-  justify-content:center;
-  flex-wrap:wrap;
-}
+/* Side by side */
+.preview-row { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
 .preview-box {
-  flex:1;
-  min-width:200px;
-  max-width:420px;
-  text-align:center;
+  flex: 1; min-width: 280px; max-width: 500px; text-align: center;
 }
 .preview-box .label {
-  font-size:13px;
-  color:var(--text-secondary);
-  display:block;
-  margin-bottom:8px;
-  font-weight:500;
+  font-size: 14px; color: var(--text2); display: block; margin-bottom: 8px;
+  font-weight: 600; letter-spacing: 0.5px;
 }
-.preview-box canvas,
-.preview-box img {
-  max-width:100%;
-  border-radius:12px;
-  box-shadow:0 2px 12px var(--shadow);
-  background:#fff;
+.preview-box canvas, .preview-box img {
+  max-width: 100%; border-radius: 12px; box-shadow: 0 2px 12px var(--shadow);
+  background: #fff;
 }
-.preview-box img { display:block; }
+.preview-box img { display: block; width: 100%; }
 
-.controls-section {
-  margin-top:24px;
-  padding-top:20px;
-  border-top:1px solid var(--border);
+/* Controls */
+.controls-bar {
+  display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center;
+  justify-content: center; margin-top: 20px; padding: 16px 20px;
+  background: #faf8f6; border-radius: 14px;
 }
-.controls-grid {
-  display:flex;
-  flex-wrap:wrap;
-  gap:16px 24px;
-  align-items:end;
+.cg { display: flex; flex-direction: column; gap: 3px; }
+.cg label { font-size: 11px; color: var(--text2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+.cg select, .cg input[type="range"] {
+  padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px;
+  background: #fff; color: var(--text); font-size: 13px; min-width: 80px;
 }
-.control-group {
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-}
-.control-group label {
-  font-size:12px;
-  color:var(--text-secondary);
-  font-weight:500;
-}
-.control-group select,
-.control-group input[type="range"] {
-  padding:6px 10px;
-  border:1px solid var(--border);
-  border-radius:8px;
-  background:var(--card-bg);
-  color:var(--text);
-  font-size:13px;
-  transition:.2s;
-}
-.control-group select:focus,
-.control-group input[type="range"]:focus {
-  outline:none;
-  border-color:var(--accent);
-}
-.control-group input[type="range"] {
-  min-width:120px;
-  accent-color:var(--accent);
-}
-.control-group .range-val {
-  font-size:11px;
-  color:var(--text-secondary);
-  text-align:center;
-}
+.cg input[type="range"] { min-width: 100px; accent-color: var(--accent); }
+.cg .rv { font-size: 11px; color: var(--text2); text-align: center; }
 
+/* Buttons */
 .btn {
-  padding:10px 24px;
-  border:none;
-  border-radius:10px;
-  font-size:14px;
-  font-weight:600;
-  cursor:pointer;
-  transition:all .2s;
-  white-space:nowrap;
+  padding: 10px 24px; border: none; border-radius: 10px; font-size: 14px;
+  font-weight: 600; cursor: pointer; transition: all .2s; white-space: nowrap;
 }
-.btn-primary { background:var(--btn-primary); color:var(--card-bg); }
-.btn-primary:hover { opacity:.85; transform:translateY(-1px); }
-.btn-primary:disabled { opacity:.4; cursor:not-allowed; transform:none; }
-.btn-accent { background:var(--accent); color:#fff; }
-.btn-accent:hover { background:var(--accent-hover); transform:translateY(-1px); }
-.btn-outline {
-  background:transparent;
-  border:1px solid var(--border);
-  color:var(--text);
-}
-.btn-outline:hover { border-color:var(--accent); background:color-mix(in srgb, var(--accent) 10%, transparent); }
-.btn-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+.btn-primary { background: #2d2a24; color: #fff; }
+.btn-primary:hover { opacity: .85; transform: translateY(-1px); }
+.btn-accent { background: var(--accent); color: #fff; }
+.btn-accent:hover { background: var(--accent-h); transform: translateY(-1px); }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.btn-outline:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
 
-#sizeInfo {
-  font-size:12px;
-  color:var(--text-secondary);
-  text-align:center;
-  margin-top:12px;
-}
-
-/* Color Legend */
-.legend-section {
-  margin-top:20px;
-  padding-top:16px;
-  border-top:1px solid var(--border);
-}
-.legend-section h3 {
-  font-size:14px;
-  color:var(--text-secondary);
-  margin-bottom:12px;
-  font-weight:600;
-}
-.legend-grid {
-  display:flex;
-  flex-wrap:wrap;
-  gap:6px;
-}
-.legend-item {
-  display:flex;
-  align-items:center;
-  gap:4px;
-  padding:4px 10px 4px 4px;
-  border-radius:8px;
-  background:color-mix(in srgb, var(--card-bg) 96%, var(--text));
-  font-size:11px;
-  color:var(--text-secondary);
-}
-.legend-swatch {
-  width:16px;
-  height:16px;
-  border-radius:4px;
-  border:1px solid rgba(0,0,0,.08);
-  flex-shrink:0;
-}
-
-/* Bead size real-world info */
+/* Info */
+#infoBox { margin-top: 12px; }
+.size-info { font-size: 13px; color: var(--text2); text-align: center; }
 .bead-info {
-  display:flex;
-  gap:16px;
-  flex-wrap:wrap;
-  margin-top:12px;
-  padding:12px 16px;
-  background:color-mix(in srgb, var(--card-bg) 97%, var(--accent));
-  border-radius:10px;
-  font-size:12px;
-  color:var(--text-secondary);
-}
-.bead-info span { display:flex; align-items:center; gap:4px; }
-
-.footer {
-  margin-top:32px;
-  font-size:12px;
-  color:var(--text-secondary);
-  text-align:center;
-  line-height:1.8;
-  opacity:.7;
+  display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+  margin-top: 10px; padding: 10px 16px; background: #faf8f6;
+  border-radius: 10px; font-size: 12px; color: var(--text2);
 }
 
-@media (max-width:640px) {
-  body { padding:12px; }
-  .card { padding:16px; }
-  .upload-area { padding:32px 16px; }
-  .preview-row { flex-direction:column; align-items:center; }
-  .preview-box { min-width:160px; max-width:320px; }
-  .controls-grid { flex-direction:column; align-items:stretch; }
-  .control-group input[type="range"] { width:100%; }
-  .btn-row { flex-direction:column; }
-  .btn-row .btn { width:100%; text-align:center; }
-  .bead-info { flex-direction:column; gap:4px; }
+/* Legend */
+.legend-box { margin-top: 16px; }
+.legend-box h3 { font-size: 13px; color: var(--text2); margin-bottom: 10px; font-weight: 600; }
+.legend-grid { display: flex; flex-wrap: wrap; gap: 5px; }
+.legend-item {
+  display: flex; align-items: center; gap: 4px; padding: 3px 8px 3px 3px;
+  border-radius: 6px; background: #f5f2ef; font-size: 10px; color: var(--text2);
+}
+.legend-swatch { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,.08); flex-shrink: 0; }
+
+/* Footer */
+.footer { margin-top: 24px; font-size: 12px; color: var(--text2); text-align: center; opacity: .6; }
+
+@media (max-width: 700px) {
+  .card { padding: 16px; }
+  .preview-row { flex-direction: column; align-items: center; }
+  .preview-box { min-width: 200px; max-width: 400px; }
+  .controls-bar { flex-direction: column; align-items: stretch; }
+  .cg { width: 100%; }
+  .cg select, .cg input[type="range"] { width: 100%; }
+  .btn-row { flex-direction: column; }
+  .btn-row .btn { width: 100%; text-align: center; }
+  .upload-area { padding: 36px 16px; }
 }
 </style>
 </head>
@@ -274,19 +124,15 @@ input[type="file"] { display:none; }
 
 <div class="container">
   <div class="header">
-    <div class="header-top">
-      <div></div>
-      <button class="theme-toggle" id="themeToggle" title="切换深色/浅色模式">🌓</button>
-    </div>
-    <h1>🧩 拼豆像素工坊</h1>
-    <p class="subtitle">上传任意图片 → 一键生成标准拼豆图纸 · 支持 Perler / Artkal 色板</p>
+    <h1>🧩 拼豆<span>像素工坊</span> Pro</h1>
+    <div class="subtitle">上传任意图片 → 一键生成真实3D拼豆颗粒效果图纸</div>
   </div>
 
   <div class="card">
     <div class="upload-area" id="uploadArea">
-      <span class="icon">🖼️</span>
-      <div class="hint">点击上传图片，或拖拽图片到此处</div>
-      <div class="sub-hint">支持 JPG / PNG / WebP · 也支持 Ctrl+V 粘贴</div>
+      <span class="upload-icon">📸</span>
+      <div class="upload-hint">点击上传图片，或拖拽到此处</div>
+      <div class="upload-sub">支持 JPG / PNG / WebP · 建议使用人物、动物、卡通等轮廓清晰的图片</div>
       <input type="file" id="fileInput" accept="image/*">
     </div>
 
@@ -297,510 +143,436 @@ input[type="file"] { display:none; }
           <img id="originalPreview" alt="原图预览">
         </div>
         <div class="preview-box">
-          <span class="label">🧩 拼豆图纸</span>
-          <canvas id="pixelCanvas"></canvas>
+          <span class="label">🧩 3D 拼豆成品</span>
+          <canvas id="beadCanvas"></canvas>
         </div>
       </div>
 
-      <div class="controls-section">
-        <div class="controls-grid">
-          <div class="control-group">
-            <label>像素格数</label>
-            <select id="pixelSize">
-              <option value="8">8 × 8</option>
-              <option value="10">10 × 10</option>
-              <option value="12">12 × 12</option>
-              <option value="14">14 × 14</option>
-              <option value="16" selected>16 × 16</option>
-              <option value="18">18 × 18</option>
-              <option value="20">20 × 20</option>
-              <option value="24">24 × 24</option>
-              <option value="28">28 × 28</option>
-              <option value="32">32 × 32</option>
-              <option value="40">40 × 40</option>
-              <option value="48">48 × 48</option>
-              <option value="56">56 × 56</option>
-              <option value="64">64 × 64</option>
-            </select>
-          </div>
-          <div class="control-group">
-            <label>色板</label>
-            <select id="paletteSelect">
-              <option value="perler" selected>🟡 Perler 原厂色 (70色)</option>
-              <option value="artkal">🔵 Artkal 通用色 (70色)</option>
-              <option value="dmc">🔴 DMC 绣线色 (70色)</option>
-              <option value="full">🌈 全彩自动</option>
-            </select>
-          </div>
-          <div class="control-group">
-            <label>颜色数量 <span class="range-val" id="colorCountVal">24</span></label>
-            <input type="range" id="colorCount" min="8" max="70" value="24">
-          </div>
-          <div class="control-group">
-            <label>网格线</label>
-            <select id="gridStyle">
-              <option value="light">浅色</option>
-              <option value="dark">深色</option>
-              <option value="none">无网格</option>
-            </select>
-          </div>
-          <div class="btn-row" style="margin:0">
-            <button class="btn btn-accent" id="generateBtn">✨ 重新生成</button>
-            <button class="btn btn-primary" id="downloadBtn">⬇️ 下载高清图纸</button>
-            <button class="btn btn-outline" id="resetBtn">🔄 重新上传</button>
-          </div>
+      <div class="controls-bar">
+        <div class="cg">
+          <label>像素格数</label>
+          <select id="gridSize">
+            <option value="32">32 × 32</option>
+            <option value="40">40 × 40</option>
+            <option value="48" selected>48 × 48</option>
+            <option value="56">56 × 56</option>
+            <option value="64">64 × 64</option>
+            <option value="72">72 × 72</option>
+            <option value="80">80 × 80</option>
+          </select>
+        </div>
+        <div class="cg">
+          <label>颜色数</label>
+          <input type="range" id="colorCount" min="16" max="70" value="36">
+          <span class="rv" id="colorCountVal">36</span>
+        </div>
+        <div class="cg">
+          <label>色板</label>
+          <select id="paletteSelect">
+            <option value="perler" selected>Perler 原厂 70色</option>
+            <option value="artkal">Artkal 通用 70色</option>
+            <option value="adaptive">自适应色板</option>
+          </select>
+        </div>
+        <div class="cg">
+          <label>颗粒大小</label>
+          <select id="beadSize">
+            <option value="medium" selected>标准</option>
+            <option value="large">大颗粒</option>
+            <option value="small">小颗粒</option>
+          </select>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-accent" id="generateBtn">✨ 生成</button>
+          <button class="btn btn-primary" id="downloadBtn">⬇️ 下载图纸</button>
+          <button class="btn btn-outline" id="resetBtn">🔄 重新上传</button>
         </div>
       </div>
 
-      <div id="sizeInfo"></div>
+      <div id="infoBox">
+        <div class="size-info" id="sizeInfo"></div>
+        <div class="bead-info" id="beadInfo"></div>
+      </div>
 
-      <div class="bead-info" id="beadInfo"></div>
-
-      <div class="legend-section" id="legendSection" style="display:none">
+      <div class="legend-box" id="legendBox" style="display:none">
         <h3>🎨 用色清单</h3>
         <div class="legend-grid" id="legendGrid"></div>
       </div>
     </div>
   </div>
 
-  <div class="footer">
-    🧩 纯浏览器端处理，图片不上传服务器 · 适合 2mm/5mm 通用拼豆<br>
-    操作小贴士：建议使用轮廓清晰、色彩对比度高的图片效果更佳
-  </div>
+  <div class="footer">纯浏览器端处理 · 图片不上传服务器 · 适合 5mm / 2.6mm 通用拼豆</div>
 </div>
 <script>
 // ============================================================
-// 拼豆像素工坊 - 完整 JavaScript
+// 拼豆像素工坊 Pro - 3D Bead Rendering Engine
 // ============================================================
 
-// --- Perler 原厂色板 (RGB) ---
-const PERLER_COLORS = [
-  [0,0,0], [255,255,255], [237,28,36], [255,127,39], [255,242,0],
-  [34,177,76], [0,162,232], [63,72,204], [163,73,164], [185,122,87],
-  [195,195,195], [128,128,128], [255,201,14], [255,174,201], [239,228,176],
-  [136,176,75], [0,113,60], [0,90,160], [70,50,150], [130,50,80],
-  [117,75,45], [235,145,55], [250,210,165], [220,180,140], [195,155,120],
-  [169,131,101], [145,108,82], [120,86,64], [200,175,150], [175,150,125],
-  [150,125,100], [230,210,190], [220,190,160], [205,170,140], [190,155,125],
-  [170,135,105], [150,115,85], [235,205,175], [215,185,155], [200,165,135],
-  [240,218,190], [225,195,165], [210,178,148], [200,165,135], [185,150,120],
-  [255,180,160], [240,155,135], [225,135,115], [210,115,95], [195,95,75],
-  [255,200,180], [245,180,160], [235,160,140], [255,215,190], [250,198,170],
-  [245,185,155], [255,225,200], [250,210,185], [255,235,210], [250,220,195],
-  [245,208,182], [255,190,128], [240,175,115], [230,160,100], [220,145,85],
-  [210,130,70], [200,115,55], [190,100,40], [180,178,150], [165,163,135]
+// --- Perler Palette (70 core colors) ---
+const PERLER = [
+  [0,0,0],[255,255,255],[237,28,36],[255,127,39],[255,242,0],
+  [34,177,76],[0,162,232],[63,72,204],[163,73,164],[185,122,87],
+  [195,195,195],[128,128,128],[255,201,14],[255,174,201],[239,228,176],
+  [136,176,75],[0,113,60],[0,90,160],[70,50,150],[130,50,80],
+  [117,75,45],[235,145,55],[250,210,165],[220,180,140],[195,155,120],
+  [169,131,101],[145,108,82],[120,86,64],[200,175,150],[175,150,125],
+  [150,125,100],[230,210,190],[220,190,160],[205,170,140],[190,155,125],
+  [170,135,105],[150,115,85],[235,205,175],[215,185,155],[200,165,135],
+  [240,218,190],[225,195,165],[210,178,148],[200,165,135],[185,150,120],
+  [255,180,160],[240,155,135],[225,135,115],[210,115,95],[195,95,75],
+  [255,200,180],[245,180,160],[235,160,140],[255,215,190],[250,198,170],
+  [245,185,155],[255,225,200],[250,210,185],[255,235,210],[250,220,195],
+  [245,208,182],[255,190,128],[240,175,115],[230,160,100],[220,145,85],
+  [210,130,70],[200,115,55],[190,100,40],[180,178,150],[165,163,135]
 ];
 
-// --- Artkal 通用色板 (模拟标准70色) ---
-const ARTKAL_COLORS = [
-  [0,0,0], [255,255,255], [220,30,30], [240,130,20], [245,230,30],
-  [40,180,60], [20,150,210], [50,60,190], [150,60,170], [170,110,70],
-  [180,180,180], [120,120,120], [250,200,20], [255,170,200], [230,220,170],
-  [130,170,70], [10,110,50], [10,90,160], [60,40,140], [120,40,70],
-  [100,70,40], [230,140,50], [245,210,160], [215,180,140], [190,160,125],
-  [165,135,105], [140,110,85], [115,85,65], [195,170,145], [170,145,120],
-  [145,120,95], [225,205,185], [215,185,155], [200,165,135], [185,150,120],
-  [165,130,100], [145,110,80], [230,200,170], [210,180,150], [195,160,130],
-  [235,213,185], [220,190,160], [205,173,143], [195,160,130], [180,145,115],
-  [255,175,155], [235,150,130], [220,130,110], [205,110,90], [190,90,70],
-  [255,195,175], [240,175,155], [230,155,135], [255,210,185], [245,193,165],
-  [240,180,150], [255,220,195], [245,205,180], [255,230,205], [245,215,190],
-  [240,203,177], [255,185,123], [235,170,110], [225,155,95], [215,140,80],
-  [205,125,65], [195,110,50], [185,95,35], [175,173,145], [160,158,130]
+// --- Artkal (70 color approximation) ---
+const ARTKAL = [
+  [0,0,0],[255,255,255],[220,30,30],[240,130,20],[245,230,30],
+  [40,180,60],[20,150,210],[50,60,190],[150,60,170],[170,110,70],
+  [180,180,180],[120,120,120],[250,200,20],[255,170,200],[230,220,170],
+  [130,170,70],[10,110,50],[10,90,160],[60,40,140],[120,40,70],
+  [100,70,40],[230,140,50],[245,210,160],[215,180,140],[190,160,125],
+  [165,135,105],[140,110,85],[115,85,65],[195,170,145],[170,145,120],
+  [145,120,95],[225,205,185],[215,185,155],[200,165,135],[185,150,120],
+  [165,130,100],[145,110,80],[230,200,170],[210,180,150],[195,160,130],
+  [235,213,185],[220,190,160],[205,173,143],[195,160,130],[180,145,115],
+  [255,175,155],[235,150,130],[220,130,110],[205,110,90],[190,90,70],
+  [255,195,175],[240,175,155],[230,155,135],[255,210,185],[245,193,165],
+  [240,180,150],[255,220,195],[245,205,180],[255,230,205],[245,215,190],
+  [240,203,177],[255,185,123],[235,170,110],[225,155,95],[215,140,80],
+  [205,125,65],[195,110,50],[185,95,35],[175,173,145],[160,158,130]
 ];
 
-// --- DMC 绣线色板 (70色模拟) ---
-const DMC_COLORS = [
-  [0,0,0], [255,255,255], [230,25,35], [255,140,30], [255,230,40],
-  [50,185,65], [30,155,215], [65,70,200], [165,70,170], [180,120,80],
-  [190,190,190], [130,130,130], [250,200,30], [255,180,210], [235,225,180],
-  [140,180,80], [20,115,55], [15,95,165], [70,45,145], [135,50,80],
-  [105,75,45], [235,145,60], [250,215,170], [220,185,145], [195,160,130],
-  [170,138,110], [148,115,88], [122,92,68], [200,178,155], [175,153,130],
-  [150,128,105], [230,212,195], [218,190,162], [202,170,142], [188,155,127],
-  [170,138,108], [152,118,88], [232,205,178], [215,185,155], [200,168,138],
-  [238,215,190], [222,195,168], [208,178,150], [198,165,135], [182,150,122],
-  [255,185,165], [242,158,138], [228,138,118], [212,118,98], [198,98,78],
-  [255,200,182], [248,183,163], [238,163,143], [255,218,195], [248,200,175],
-  [242,188,160], [255,228,205], [248,213,190], [255,238,215], [248,222,198],
-  [242,210,185], [255,195,135], [242,178,120], [232,162,105], [222,148,90],
-  [212,133,75], [198,118,58], [190,102,45], [183,180,155], [168,165,140]
-];
-
-const PALETTES = { perler: PERLER_COLORS, artkal: ARTKAL_COLORS, dmc: DMC_COLORS };
-
-// ============================================================
-// DOM refs
-// ============================================================
-const uploadArea = document.getElementById('uploadArea');
-const fileInput = document.getElementById('fileInput');
-const workspace = document.getElementById('workspace');
-const originalPreview = document.getElementById('originalPreview');
-const pixelCanvas = document.getElementById('pixelCanvas');
-const pixelSizeSelect = document.getElementById('pixelSize');
-const paletteSelect = document.getElementById('paletteSelect');
-const colorCountInput = document.getElementById('colorCount');
-const colorCountVal = document.getElementById('colorCountVal');
-const gridStyleSelect = document.getElementById('gridStyle');
-const generateBtn = document.getElementById('generateBtn');
-const downloadBtn = document.getElementById('downloadBtn');
-const resetBtn = document.getElementById('resetBtn');
-const sizeInfo = document.getElementById('sizeInfo');
-const beadInfo = document.getElementById('beadInfo');
-const legendSection = document.getElementById('legendSection');
-const legendGrid = document.getElementById('legendGrid');
-const themeToggle = document.getElementById('themeToggle');
-
-let sourceImage = null;
-
-// ============================================================
-// Theme
-// ============================================================
-function loadTheme() {
-  const dark = localStorage.getItem('pixelbead-theme') === 'dark';
-  document.body.classList.toggle('dark', dark);
-  themeToggle.textContent = dark ? '☀️' : '🌓';
-}
-loadTheme();
-themeToggle.addEventListener('click', () => {
-  const dark = document.body.classList.toggle('dark');
-  localStorage.setItem('pixelbead-theme', dark ? 'dark' : 'light');
-  themeToggle.textContent = dark ? '☀️' : '🌓';
-});
-
-// ============================================================
-// Image loading
-// ============================================================
-uploadArea.addEventListener('click', () => fileInput.click());
-
-uploadArea.addEventListener('dragover', e => {
-  e.preventDefault();
-  uploadArea.classList.add('dragover');
-});
-uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
-uploadArea.addEventListener('drop', e => {
-  e.preventDefault();
-  uploadArea.classList.remove('dragover');
-  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-});
-
-document.addEventListener('paste', e => {
-  const item = [...e.clipboardData.items].find(i => i.type.startsWith('image/'));
-  if (item) handleFile(item.getAsFile());
-});
-
-fileInput.addEventListener('change', () => {
-  if (fileInput.files.length) handleFile(fileInput.files[0]);
-});
-
-function handleFile(file) {
-  if (!file || !file.type.startsWith('image/')) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const img = new Image();
-    img.onload = () => {
-      sourceImage = img;
-      originalPreview.src = e.target.result;
-      workspace.classList.add('visible');
-      generate();
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-resetBtn.addEventListener('click', () => {
-  sourceImage = null;
-  workspace.classList.remove('visible');
-  originalPreview.src = '';
-  fileInput.value = '';
-  legendSection.style.display = 'none';
-});
+const PALETTES = { perler: PERLER, artkal: ARTKAL };
 
 // ============================================================
 // Color quantization (Median Cut)
 // ============================================================
-function quantizeColors(pixels, numColors) {
-  if (numColors >= pixels.length) return pixels;
-  const boxes = [{ start: 0, end: pixels.length - 1 }];
-
-  function splitBox(box) {
-    const slice = pixels.slice(box.start, box.end + 1);
-    const rRange = Math.max(...slice.map(p=>p[0])) - Math.min(...slice.map(p=>p[0]));
-    const gRange = Math.max(...slice.map(p=>p[1])) - Math.min(...slice.map(p=>p[1]));
-    const bRange = Math.max(...slice.map(p=>p[2])) - Math.min(...slice.map(p=>p[2]));
-
-    let channel; let maxRange;
-    if (rRange >= gRange && rRange >= bRange) { channel = 0; maxRange = rRange; }
-    else if (gRange >= bRange) { channel = 1; maxRange = gRange; }
-    else { channel = 2; maxRange = bRange; }
-
-    if (maxRange < 5) return null;
-
-    const sorted = [...pixels.entries()]
-      .filter(([i]) => i >= box.start && i <= box.end)
-      .sort((a, b) => a[1][channel] - b[1][channel])
-      .map(([i]) => i);
-
-    const mid = Math.floor(sorted.length / 2);
-    const splitIdx = sorted[mid];
-    if (splitIdx === box.start || splitIdx === box.end) return null;
-
-    return [
-      { start: box.start, end: splitIdx },
-      { start: splitIdx + 1, end: box.end }
-    ];
+function medianCut(pixels, n) {
+  if (pixels.length <= n) return [...new Map(pixels.map(p=>[p.join(","),p])).values()];
+  let boxes = [{s:0,e:pixels.length-1}];
+  while (boxes.length < n) {
+    let bi = 0;
+    for (let i=1; i<boxes.length; i++) if (boxes[i].e-boxes[i].s > boxes[bi].e-boxes[bi].s) bi=i;
+    let box = boxes[bi];
+    let slice = pixels.slice(box.s, box.e+1);
+    let rR = Math.max(...slice.map(p=>p[0]))-Math.min(...slice.map(p=>p[0]));
+    let gR = Math.max(...slice.map(p=>p[1]))-Math.min(...slice.map(p=>p[1]));
+    let bR = Math.max(...slice.map(p=>p[2]))-Math.min(...slice.map(p=>p[2]));
+    let ch = rR>=gR&&rR>=bR?0: gR>=bR?1:2;
+    let maxR = [rR,gR,bR][ch];
+    if (maxR < 8) break;
+    let idxs = [...pixels.keys()].filter(i=>i>=box.s&&i<=box.e)
+      .sort((a,b)=>pixels[a][ch]-pixels[b][ch]);
+    let mid = Math.floor(idxs.length/2);
+    let split = idxs[mid];
+    if (split===box.s||split===box.e) break;
+    boxes.splice(bi,1,{s:box.s,e:split},{s:split+1,e:box.e});
   }
-
-  while (boxes.length < numColors) {
-    const largest = boxes.reduce((a, b) => (a.end - a.start) > (b.end - b.start) ? a : b);
-    const split = splitBox(largest);
-    if (!split) break;
-    const idx = boxes.indexOf(largest);
-    boxes.splice(idx, 1, ...split.filter(b => b.end - b.start >= 0));
-  }
-
-  const palette = boxes.map(box => {
-    const slice = pixels.slice(box.start, box.end + 1);
-    const r = Math.round(slice.reduce((s,p) => s + p[0], 0) / slice.length);
-    const g = Math.round(slice.reduce((s,p) => s + p[1], 0) / slice.length);
-    const b = Math.round(slice.reduce((s,p) => s + p[2], 0) / slice.length);
-    return [r, g, b];
+  return boxes.map(b=>{
+    let s = pixels.slice(b.s,b.e+1);
+    return [Math.round(s.reduce((a,p)=>a+p[0],0)/s.length), Math.round(s.reduce((a,p)=>a+p[1],0)/s.length), Math.round(s.reduce((a,p)=>a+p[2],0)/s.length)];
   });
-
-  return palette;
 }
 
-function findClosestColor(rgb, palette) {
-  let minD = Infinity; let best = palette[0];
+function nearestColor(rgb, palette) {
+  let minD=Infinity, best=palette[0];
   for (const c of palette) {
-    const d = (rgb[0]-c[0])**2 + (rgb[1]-c[1])**2 + (rgb[2]-c[2])**2;
-    if (d < minD) { minD = d; best = c; if (d === 0) break; }
+    let d = (rgb[0]-c[0])**2+(rgb[1]-c[1])**2+(rgb[2]-c[2])**2;
+    if (d<minD) { minD=d; best=c; if (d===0) break; }
   }
   return best;
 }
 
 // ============================================================
-// Main generation
+// DOM refs
 // ============================================================
-function generate() {
-  if (!sourceImage) return;
+const $ = id => document.getElementById(id);
+const uploadArea = $('uploadArea'), fileInput = $('fileInput');
+const workspace = $('workspace'), origPreview = $('originalPreview');
+const beadCanvas = $('beadCanvas');
+const gridSizeSel = $('gridSize'), paletteSel = $('paletteSelect');
+const colorCount = $('colorCount'), colorCountVal = $('colorCountVal');
+const beadSizeSel = $('beadSize');
+const genBtn = $('generateBtn'), dloadBtn = $('downloadBtn'), resetBtn = $('resetBtn');
+const sizeInfo = $('sizeInfo'), beadInfo = $('beadInfo');
+const legendBox = $('legendBox'), legendGrid = $('legendGrid');
 
-  const gridSize = parseInt(pixelSizeSelect.value);
-  const paletteMode = paletteSelect.value;
-  const targetColors = parseInt(colorCountInput.value);
-  const gridStyle = gridStyleSelect.value;
-  const canvas = pixelCanvas;
+let sourceImg = null;
+
+// ============================================================
+// Image loading
+// ============================================================
+uploadArea.addEventListener('click', () => fileInput.click());
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('dragover'); if (e.dataTransfer.files.length) loadFile(e.dataTransfer.files[0]); });
+document.addEventListener('paste', e => { const item = [...e.clipboardData.items].find(i=>i.type.startsWith('image/')); if (item) loadFile(item.getAsFile()); });
+fileInput.addEventListener('change', () => { if (fileInput.files.length) loadFile(fileInput.files[0]); });
+
+function loadFile(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  const r = new FileReader();
+  r.onload = e => {
+    const img = new Image();
+    img.onload = () => { sourceImg = img; origPreview.src = e.target.result; workspace.classList.add('visible'); render(); };
+    img.src = e.target.result;
+  };
+  r.readAsDataURL(file);
+}
+
+resetBtn.addEventListener('click', () => {
+  sourceImg = null; workspace.classList.remove('visible'); origPreview.src = '';
+  fileInput.value = ''; legendBox.style.display = 'none';
+});
+
+// ============================================================
+// Main 3D Bead Rendering Engine
+// ============================================================
+function render() {
+  if (!sourceImg) return;
+  const grid = parseInt(gridSizeSel.value);
+  const pMode = paletteSel.value;
+  const nColors = parseInt(colorCount.value);
+  const bSize = beadSizeSel.value;
+
+  // --- Step 1: Sample image at grid resolution ---
+  const tmp = document.createElement('canvas');
+  tmp.width = grid; tmp.height = grid;
+  const tctx = tmp.getContext('2d');
+  tctx.imageSmoothingEnabled = true;
+
+  // Center-crop to square
+  const a = sourceImg.width / sourceImg.height;
+  let sx,sy,sw,sh;
+  if (a > 1) { sh = sourceImg.height; sw = sourceImg.height; sx = (sourceImg.width-sw)/2; sy = 0; }
+  else { sw = sourceImg.width; sh = sourceImg.width; sx = 0; sy = (sourceImg.height-sh)/2; }
+  tctx.drawImage(sourceImg, sx, sy, sw, sh, 0, 0, grid, grid);
+
+  const imgData = tctx.getImageData(0,0,grid,grid);
+  const data = imgData.data;
+
+  // Extract pixel colors
+  const pixels = [];
+  for (let i=0; i<data.length; i+=4) pixels.push([data[i],data[i+1],data[i+2]]);
+
+  // --- Step 2: Build palette ---
+  let palette;
+  if (pMode === 'adaptive') {
+    palette = medianCut(pixels, nColors);
+  } else {
+    palette = PALETTES[pMode] || PERLER;
+    // Sub-select nColors from palette
+    if (nColors < palette.length) {
+      const step = palette.length / nColors;
+      const sub = [];
+      for (let i=0; i<nColors; i++) sub.push(palette[Math.floor(i*step) % palette.length]);
+      palette = sub;
+    }
+  }
+
+  // --- Step 3: Map pixels to nearest palette colors ---
+  const mapped = new Uint8ClampedArray(data.length);
+  const counts = new Map();
+  for (let i=0; i<data.length; i+=4) {
+    const rgb = [data[i],data[i+1],data[i+2]];
+    const n = nearestColor(rgb, palette);
+    mapped[i]=n[0]; mapped[i+1]=n[1]; mapped[i+2]=n[2]; mapped[i+3]=255;
+    counts.set(n.join(','), (counts.get(n.join(','))||0)+1);
+  }
+
+  // --- Step 4: Draw 3D beads ---
+  const canvas = beadCanvas;
   const ctx = canvas.getContext('2d');
-  const cellSize = Math.floor(400 / gridSize);
-  const px = cellSize * gridSize;
 
-  canvas.width = px;
-  canvas.height = px;
-
-  // Step 1: sample image to grid
-  const tempCanvas = document.createElement('canvas');
-  tempCanvas.width = gridSize;
-  tempCanvas.height = gridSize;
-  const tempCtx = tempCanvas.getContext('2d');
-  tempCtx.imageSmoothingEnabled = true;
-
-  const srcAspect = sourceImage.width / sourceImage.height;
-  let sx, sy, sw, sh;
-  if (srcAspect > 1) {
-    sh = sourceImage.height;
-    sw = sourceImage.height;
-    sx = (sourceImage.width - sw) / 2;
-    sy = 0;
-  } else {
-    sw = sourceImage.width;
-    sh = sourceImage.width;
-    sx = 0;
-    sy = (sourceImage.height - sh) / 2;
-  }
-  tempCtx.drawImage(sourceImage, sx, sy, sw, sh, 0, 0, gridSize, gridSize);
-  const imageData = tempCtx.getImageData(0, 0, gridSize, gridSize);
-  const data = imageData.data;
-
-  // Step 2: extract unique pixel colors
-  const pixelRGBs = [];
-  for (let i = 0; i < data.length; i += 4) {
-    pixelRGBs.push([data[i], data[i+1], data[i+2]]);
+  // Determine bead rendering parameters
+  let beadScale, gapFrac;
+  switch(bSize) {
+    case 'large': beadScale = 0.88; gapFrac = 0.06; break;
+    case 'small': beadScale = 0.78; gapFrac = 0.11; break;
+    default: beadScale = 0.84; gapFrac = 0.08;
   }
 
-  // Step 3: determine final palette
-  let finalPalette;
-  if (paletteMode === 'full') {
-    if (targetColors < pixelRGBs.length) {
-      finalPalette = quantizeColors(pixelRGBs, targetColors);
-    } else {
-      finalPalette = [...new Map(pixelRGBs.map(p => [p.join(','), p])).values()];
+  const canvasW = 800;
+  const cellSize = canvasW / grid;
+  const beadR = cellSize * beadScale / 2;
+  const gap = cellSize * gapFrac;
+  const holeR = beadR * 0.22;
+
+  canvas.width = canvasW;
+  canvas.height = canvasW;
+
+  // Draw pegboard background
+  const boardColor = '#e8e2d8';
+  ctx.fillStyle = boardColor;
+  ctx.fillRect(0, 0, canvasW, canvasW);
+
+  // Draw subtle board grid
+  ctx.strokeStyle = 'rgba(180,170,155,0.15)';
+  ctx.lineWidth = 0.5;
+  for (let i=0; i<=grid; i++) {
+    const p = i * cellSize;
+    ctx.beginPath(); ctx.moveTo(p,0); ctx.lineTo(p,canvasW); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,p); ctx.lineTo(canvasW,p); ctx.stroke();
+  }
+
+  // Draw each bead as a 3D cylinder
+  for (let row=0; row<grid; row++) {
+    for (let col=0; col<grid; col++) {
+      const idx = (row * grid + col) * 4;
+      const r = mapped[idx], g = mapped[idx+1], b = mapped[idx+2];
+
+      const cx = col * cellSize + cellSize/2;
+      const cy = row * cellSize + cellSize/2;
+
+      // Base color
+      const br = Math.min(255, r+15), bg = Math.min(255,g+15), bb = Math.min(255,b+15);
+
+      // Shadow (bottom-right)
+      const grad = ctx.createRadialGradient(cx+beadR*0.3, cy+beadR*0.3, beadR*0.1, cx, cy, beadR);
+      grad.addColorStop(0, `rgb(${Math.min(255,br+30)},${Math.min(255,bg+30)},${Math.min(255,bb+30)})`);
+      grad.addColorStop(0.65, `rgb(${br},${bg},${bb})`);
+      grad.addColorStop(1, `rgb(${Math.max(0,r-25)},${Math.max(0,g-25)},${Math.max(0,b-25)})`);
+
+      // Draw bead circle
+      ctx.beginPath();
+      ctx.arc(cx, cy, beadR, 0, Math.PI*2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Subtle edge shadow / rim
+      ctx.strokeStyle = `rgba(0,0,0,0.08)`;
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+
+      // Top highlight
+      const hGrad = ctx.createRadialGradient(cx-beadR*0.25, cy-beadR*0.25, 0, cx-beadR*0.1, cy-beadR*0.1, beadR*0.5);
+      hGrad.addColorStop(0, `rgba(255,255,255,0.35)`);
+      hGrad.addColorStop(1, `rgba(255,255,255,0)`);
+      ctx.beginPath();
+      ctx.arc(cx, cy, beadR, 0, Math.PI*2);
+      ctx.fillStyle = hGrad;
+      ctx.fill();
+
+      // Center hole
+      ctx.beginPath();
+      ctx.arc(cx, cy, holeR, 0, Math.PI*2);
+      const hGrad2 = ctx.createRadialGradient(cx, cy, 0, cx, cy, holeR);
+      hGrad2.addColorStop(0, `rgba(40,35,30,0.50)`);
+      hGrad2.addColorStop(0.7, `rgba(60,55,50,0.35)`);
+      hGrad2.addColorStop(1, `rgba(80,75,70,0.15)`);
+      ctx.fillStyle = hGrad2;
+      ctx.fill();
+
+      // Hole rim highlight
+      ctx.beginPath();
+      ctx.arc(cx-holeR*0.2, cy-holeR*0.2, holeR*0.9, 0, Math.PI*2);
+      const rimGrad = ctx.createRadialGradient(cx-holeR*0.3, cy-holeR*0.3, 0, cx, cy, holeR);
+      rimGrad.addColorStop(0, `rgba(255,255,255,0.10)`);
+      rimGrad.addColorStop(1, `rgba(255,255,255,0)`);
+      ctx.fillStyle = rimGrad;
+      ctx.fill();
     }
-  } else {
-    const rawPalette = PALETTES[paletteMode] || PERLER_COLORS;
-    // Use the palette directly, but limit to targetColors by picking well-distributed colors
-    const step = Math.max(1, Math.floor(rawPalette.length / targetColors));
-    finalPalette = [];
-    for (let i = 0; i < targetColors && i < rawPalette.length; i++) {
-      finalPalette.push(rawPalette[i * step % rawPalette.length]);
-    }
-    if (finalPalette.length === 0) finalPalette = [[0,0,0], [255,255,255]];
   }
 
-  // Step 4: map each pixel to nearest palette color
-  const pixelData = new Uint8ClampedArray(data.length);
-  const colorCounts = new Map();
-  for (let i = 0; i < data.length; i += 4) {
-    const rgb = [data[i], data[i+1], data[i+2]];
-    const nearest = findClosestColor(rgb, finalPalette);
-    pixelData[i] = nearest[0];
-    pixelData[i+1] = nearest[1];
-    pixelData[i+2] = nearest[2];
-    pixelData[i+3] = 255;
-    const key = nearest.join(',');
-    colorCounts.set(key, (colorCounts.get(key) || 0) + 1);
-  }
-
-  // Step 5: draw pixelated result
-  const outCanvas = document.createElement('canvas');
-  outCanvas.width = gridSize;
-  outCanvas.height = gridSize;
-  const outCtx = outCanvas.getContext('2d');
-  const outImageData = new ImageData(pixelData, gridSize, gridSize);
-  outCtx.putImageData(outImageData, 0, 0);
-
-  ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(outCanvas, 0, 0, px, px);
-
-  // Step 6: draw grid lines
-  if (gridStyle !== 'none') {
-    const isDark = gridStyle === 'dark';
-    ctx.strokeStyle = isDark ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.15)';
-    ctx.lineWidth = 0.5;
-    for (let i = 0; i <= gridSize; i++) {
-      const pos = i * cellSize;
-      ctx.beginPath(); ctx.moveTo(pos, 0); ctx.lineTo(pos, px); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0, pos); ctx.lineTo(px, pos); ctx.stroke();
-    }
-  }
-
-  // Step 7: info display
-  const maxBoardSize = 29; // standard pegboard
-  const boardsNeededW = Math.ceil(gridSize / maxBoardSize);
-  const boardsNeededH = Math.ceil(gridSize / maxBoardSize);
-  sizeInfo.textContent = `${gridSize}×${gridSize} 像素 · 每个色块 ${cellSize}×${cellSize}px · 约需 ${boardsNeededW}×${boardsNeededH} 块标准拼豆板(29×29)`;
-
-  // Step 8: bead info
-  let paletteName = 'Perler';
-  if (paletteMode === 'artkal') paletteName = 'Artkal';
-  else if (paletteMode === 'dmc') paletteName = 'DMC';
-  else if (paletteMode === 'full') paletteName = '自动调色';
-  const usedColors = colorCounts.size;
+  // --- Step 5: Info display ---
+  const boards = Math.ceil(grid/29);
+  const paletteName = pMode === 'artkal' ? 'Artkal' : pMode === 'adaptive' ? '自适应' : 'Perler';
+  const usedColors = counts.size;
+  sizeInfo.textContent = `${grid}×${grid} 拼豆 · ${usedColors}色 · ${paletteName}色板 · ${boards}×${boards} 块标准板(29×29)`;
   beadInfo.innerHTML = `
-    <span>📐 色板：${paletteName}</span>
+    <span>🧩 ${grid*grid} 颗拼豆</span>
+    <span>📏 5mm豆: ${(grid*5/10).toFixed(1)}×${(grid*5/10).toFixed(1)} cm</span>
+    <span>📏 2.6mm豆: ${(grid*2.6/10).toFixed(1)}×${(grid*2.6/10).toFixed(1)} cm</span>
     <span>🎨 使用 ${usedColors} 种颜色</span>
-    <span>🧩 拼豆数：${gridSize * gridSize} 颗</span>
-    <span>📏 5mm豆成品约 ${(gridSize * 5 / 10).toFixed(1)}×${(gridSize * 5 / 10).toFixed(1)} cm</span>
-    <span>📏 2.6mm迷你豆约 ${(gridSize * 2.6 / 10).toFixed(1)}×${(gridSize * 2.6 / 10).toFixed(1)} cm</span>
   `;
 
-  // Step 9: color legend
-  const sorted = [...colorCounts.entries()].sort((a, b) => b[1] - a[1]);
+  // --- Step 6: Color legend ---
+  const sorted = [...counts.entries()].sort((a,b) => b[1]-a[1]);
   if (sorted.length > 0) {
-    legendSection.style.display = 'block';
-    legendGrid.innerHTML = sorted.map(([key, count]) => {
-      const [r,g,b] = key.split(',').map(Number);
-      const rgbStr = `rgb(${r},${g},${b})`;
-      return `<div class="legend-item"><div class="legend-swatch" style="background:${rgbStr}"></div>${rgbStr} × ${count}</div>`;
+    legendBox.style.display = 'block';
+    legendGrid.innerHTML = sorted.map(([k,c]) => {
+      const [r,g,b] = k.split(',').map(Number);
+      return `<div class="legend-item"><div class="legend-swatch" style="background:rgb(${r},${g},${b})"></div>rgb(${r},${g},${b}) × ${c}</div>`;
     }).join('');
-  } else {
-    legendSection.style.display = 'none';
   }
 }
 
 // ============================================================
-// Events
+// Event listeners
 // ============================================================
-generateBtn.addEventListener('click', generate);
-pixelSizeSelect.addEventListener('change', generate);
-paletteSelect.addEventListener('change', generate);
-colorCountInput.addEventListener('input', () => {
-  colorCountVal.textContent = colorCountInput.value;
-  generate();
-});
-gridStyleSelect.addEventListener('change', generate);
+genBtn.addEventListener('click', render);
+gridSizeSel.addEventListener('change', render);
+paletteSel.addEventListener('change', render);
+colorCount.addEventListener('input', () => { colorCountVal.textContent = colorCount.value; render(); });
+beadSizeSel.addEventListener('change', render);
 
 // ============================================================
-// Download HD image with labels
+// Download HD image with real bead rendering
 // ============================================================
-downloadBtn.addEventListener('click', () => {
-  if (!sourceImage || !workspace.classList.contains('visible')) return;
-  const gridSize = parseInt(pixelSizeSelect.value);
-  const cellSize = Math.floor(400 / gridSize);
-  const px = cellSize * gridSize;
+dloadBtn.addEventListener('click', () => {
+  if (!sourceImg || !workspace.classList.contains('visible')) return;
+  const grid = parseInt(gridSizeSel.value);
+  const bSize = beadSizeSel.value;
 
-  // Create high-res export canvas
+  // Re-render at 2x resolution for export
   const exportCanvas = document.createElement('canvas');
-  const scale = 2; // 2x for print quality
-  const margin = 30 * scale;
-  const labelHeight = 50 * scale;
-  const exportW = px * scale + margin * 2;
-  const exportH = px * scale + margin * 2 + labelHeight;
+  const scale = 2;
+  const margin = 40 * scale;
+  const headerH = 70 * scale;
+  const canvasW = 800;
+  const exportW = canvasW * scale + margin * 2;
+  const exportH = canvasW * scale + margin * 2 + headerH;
   exportCanvas.width = exportW;
   exportCanvas.height = exportH;
   const ectx = exportCanvas.getContext('2d');
 
-  // Background
+  // White background
   ectx.fillStyle = '#ffffff';
   ectx.fillRect(0, 0, exportW, exportH);
 
   // Title
   ectx.fillStyle = '#2d2a24';
-  ectx.font = `bold ${18 * scale}px -apple-system, sans-serif`;
+  ectx.font = `bold ${20*scale}px sans-serif`;
   ectx.textAlign = 'center';
-  ectx.fillText('🧩 拼豆图纸 · Pixel Bead Pattern', exportW / 2, margin + 14 * scale);
+  ectx.fillText('🧩 拼豆图纸 · Pixel Bead Pattern', exportW/2, margin + 18*scale);
 
   // Subtitle
+  const paletteName = paletteSel.value === 'artkal' ? 'Artkal' : paletteSel.value === 'adaptive' ? '自适应' : 'Perler';
   ectx.fillStyle = '#7a6e5e';
-  ectx.font = `${11 * scale}px -apple-system, sans-serif`;
-  ectx.fillText(`${gridSize}×${gridSize}  |  5mm豆约 ${(gridSize * 5 / 10).toFixed(1)}×${(gridSize * 5 / 10).toFixed(1)} cm  |  2.6mm迷你豆约 ${(gridSize * 2.6 / 10).toFixed(1)}×${(gridSize * 2.6 / 10).toFixed(1)} cm`, exportW / 2, margin + 30 * scale);
+  ectx.font = `${13*scale}px sans-serif`;
+  const pN = paletteSel.value==='artkal'?'Artkal':paletteSel.value==='adaptive'?'自适应':'Perler';
+  ectx.fillText(`${grid}×${grid} · ${pN}色板 · 5mm:${(grid*5/10).toFixed(1)}×${(grid*5/10).toFixed(1)}cm · 2.6mm:${(grid*2.6/10).toFixed(1)}×${(grid*2.6/10).toFixed(1)}cm`, exportW/2, margin + 40*scale);
 
-  // Draw the pixel art
+  // Draw the bead canvas scaled up
   ectx.imageSmoothingEnabled = false;
-  ectx.drawImage(pixelCanvas, 0, 0, px, px, margin, margin + labelHeight, px * scale, px * scale);
+  ectx.drawImage(beadCanvas, 0, 0, canvasW, canvasW, margin, margin+headerH, canvasW*scale, canvasW*scale);
 
-  // Scale ruler at bottom
-  const rulerY = margin + labelHeight + px * scale + 4 * scale;
+  // Scale bar
+  const rulerY = margin + headerH + canvasW*scale + 8*scale;
   ectx.strokeStyle = '#999';
-  ectx.lineWidth = 1 * scale;
-  const rulerLen = 100 * scale;
-  const rulerX = margin;
+  ectx.lineWidth = 1.5*scale;
+  const rLen = 120*scale;
   ectx.beginPath();
-  ectx.moveTo(rulerX, rulerY); ectx.lineTo(rulerX + rulerLen, rulerY);
-  ectx.moveTo(rulerX, rulerY - 3 * scale); ectx.lineTo(rulerX, rulerY + 3 * scale);
-  ectx.moveTo(rulerX + rulerLen, rulerY - 3 * scale); ectx.lineTo(rulerX + rulerLen, rulerY + 3 * scale);
+  ectx.moveTo(margin, rulerY); ectx.lineTo(margin+rLen, rulerY);
+  ectx.moveTo(margin, rulerY-4*scale); ectx.lineTo(margin, rulerY+4*scale);
+  ectx.moveTo(margin+rLen, rulerY-4*scale); ectx.lineTo(margin+rLen, rulerY+4*scale);
   ectx.stroke();
   ectx.fillStyle = '#999';
-  ectx.font = `${9 * scale}px -apple-system, sans-serif`;
+  ectx.font = `${10*scale}px sans-serif`;
   ectx.textAlign = 'center';
-  ectx.fillText('10 cm (5mm豆约20格)', rulerX + rulerLen / 2, rulerY + 14 * scale);
+  ectx.fillText('10 cm (5mm豆约20格)', margin+rLen/2, rulerY+18*scale);
 
-  // Export
+  // Download
   const link = document.createElement('a');
-  link.download = `pixel-bead-pattern-${gridSize}x${gridSize}.png`;
+  link.download = `pixel-bead-3d-${grid}x${grid}.png`;
   link.href = exportCanvas.toDataURL('image/png');
   link.click();
 });
 
-// ============================================================
-// Auto-generate on first image load
-// ============================================================
-console.log('🧩 拼豆像素工坊 v2.0 已加载');
-console.log('💡 提示: 使用 Perler 原厂色板可获得最真实拼豆效果');
+colorCountVal.textContent = colorCount.value;
+console.log('🧩 拼豆像素工坊 Pro 已加载 - 3D Bead Engine Ready');
 </script>
 </body>
 </html>
-
-
-
-
